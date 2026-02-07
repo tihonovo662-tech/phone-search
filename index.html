@@ -1,0 +1,1038 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Поиск телефонных номеров</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .header {
+            text-align: center;
+            color: white;
+            margin-bottom: 30px;
+        }
+
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
+        }
+
+        .header p {
+            font-size: 1.1em;
+            opacity: 0.9;
+        }
+
+        .search-box {
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+            margin-bottom: 30px;
+        }
+
+        .search-input-group {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+
+        #searchInput {
+            flex: 1;
+            padding: 15px 20px;
+            font-size: 1.2em;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            outline: none;
+            transition: all 0.3s;
+        }
+
+        #searchInput:focus {
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .btn {
+            padding: 15px 30px;
+            font-size: 1.1em;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-weight: 600;
+        }
+
+        .btn-search {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .btn-search:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-clear {
+            background: #f5f5f5;
+            color: #666;
+        }
+
+        .btn-clear:hover {
+            background: #e0e0e0;
+        }
+
+        .stats {
+            display: flex;
+            justify-content: space-between;
+            color: #666;
+            font-size: 0.9em;
+        }
+
+        .results {
+            background: white;
+            padding: 20px;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+            min-height: 200px;
+        }
+
+        .results-header {
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid #f0f0f0;
+        }
+
+        .results-count {
+            font-size: 1.2em;
+            color: #667eea;
+            font-weight: 600;
+        }
+
+        .phone-list {
+            display: grid;
+            gap: 10px;
+        }
+
+        .phone-item {
+            padding: 15px 20px;
+            background: #f8f9fa;
+            border-radius: 10px;
+            border-left: 4px solid #667eea;
+            transition: all 0.3s;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            cursor: pointer;
+        }
+
+        .phone-item:hover {
+            background: #e9ecef;
+            transform: translateX(5px);
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        .phone-number {
+            font-size: 1.3em;
+            font-weight: 600;
+            color: #333;
+            letter-spacing: 1px;
+        }
+
+        .phone-info {
+            font-size: 0.9em;
+            color: #666;
+        }
+
+        .no-results {
+            text-align: center;
+            padding: 50px 20px;
+            color: #999;
+        }
+
+        .no-results-icon {
+            font-size: 4em;
+            margin-bottom: 20px;
+        }
+
+        .highlight {
+            background: #ffd700;
+            padding: 2px 4px;
+            border-radius: 3px;
+            font-weight: 700;
+        }
+
+        .admin-panel {
+            background: white;
+            padding: 20px;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+            margin-bottom: 20px;
+        }
+
+        .admin-panel h3 {
+            margin-bottom: 15px;
+            color: #667eea;
+        }
+
+        #addNumberInput, #deleteNumberInput {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 10px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 1em;
+        }
+
+        #deleteNumberInput:focus, #addNumberInput:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .upload-area {
+            border: 3px dashed #667eea;
+            border-radius: 10px;
+            padding: 30px;
+            text-align: center;
+            margin: 20px 0;
+            background: #f8f9ff;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .upload-area:hover {
+            background: #f0f2ff;
+            border-color: #764ba2;
+        }
+
+        .upload-area.drag-over {
+            background: #e8ebff;
+            border-color: #764ba2;
+            transform: scale(1.02);
+        }
+
+        .upload-icon {
+            font-size: 3em;
+            margin-bottom: 10px;
+        }
+
+        .file-input {
+            display: none;
+        }
+
+        .btn-upload {
+            background: #28a745;
+            color: white;
+            margin-top: 10px;
+        }
+
+        .btn-upload:hover {
+            background: #218838;
+            transform: translateY(-2px);
+        }
+
+        .file-info {
+            margin-top: 15px;
+            padding: 10px;
+            background: #d4edda;
+            border-radius: 5px;
+            color: #155724;
+            font-size: 0.9em;
+        }
+
+        .tab-buttons {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .tab-btn {
+            flex: 1;
+            padding: 10px;
+            border: 2px solid #e0e0e0;
+            background: white;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-weight: 600;
+        }
+
+        .tab-btn.active {
+            background: #667eea;
+            color: white;
+            border-color: #667eea;
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        .toggle-admin {
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .btn-toggle {
+            background: white;
+            color: #667eea;
+            border: 2px solid #667eea;
+        }
+
+        .btn-toggle:hover {
+            background: #667eea;
+            color: white;
+        }
+
+        @media (max-width: 600px) {
+            .header h1 {
+                font-size: 1.8em;
+            }
+
+            .search-input-group {
+                flex-direction: column;
+            }
+
+            .stats {
+                flex-direction: column;
+                gap: 5px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Библиотека для работы с Excel файлами -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    
+    <div class="container">
+        <div class="header">
+            <h1>🔍 Поиск номеров</h1>
+            <p>Введите цифры для поиска телефонных номеров</p>
+        </div>
+
+        <div class="toggle-admin">
+            <button class="btn btn-toggle" onclick="toggleAdmin()">⚙️ Управление базой</button>
+        </div>
+
+        <div class="admin-panel" id="adminPanel" style="display: none;">
+            <h3>Управление базой номеров</h3>
+            
+            <div style="margin-bottom: 20px; padding: 12px; background: #d4edda; border-radius: 8px; border-left: 4px solid #28a745; font-size: 0.9em;">
+                <strong>✅ Синхронизация с Google Sheets</strong><br>
+                База обновляется автоматически каждые 30 секунд.<br>
+                Для изменения номеров редактируйте Google Таблицу напрямую.
+            </div>
+            
+            <div class="tab-buttons">
+                <button class="tab-btn active" onclick="switchTab('manual')">✍️ Добавить</button>
+                <button class="tab-btn" onclick="switchTab('delete')">🗑️ Удалить</button>
+                <button class="tab-btn" onclick="switchTab('upload')">📁 Загрузить файл</button>
+            </div>
+
+            <!-- Вкладка ручного ввода -->
+            <div id="manualTab" class="tab-content active">
+                <input type="text" id="addNumberInput" placeholder="Введите номер (например: +7 900 123-45-67)">
+                <button class="btn btn-search" onclick="addNumber()">➕ Добавить номер</button>
+                <div style="margin-top: 15px; padding: 10px; background: #e3f2fd; border-radius: 5px; font-size: 0.9em; border-left: 4px solid #2196f3;">
+                    <strong>ℹ️ Google Sheets:</strong> Номер будет добавлен временно на сайте. Для постоянного сохранения добавьте его в Google Таблицу вручную.
+                </div>
+            </div>
+
+            <!-- Вкладка удаления номера -->
+            <div id="deleteTab" class="tab-content">
+                <input type="text" id="deleteNumberInput" placeholder="Введите номер для удаления (например: +7 900 123-45-67)">
+                <button class="btn btn-clear" onclick="deleteNumber()" style="background: #dc3545; color: white; margin-top: 10px;">❌ Удалить номер</button>
+                <div style="margin-top: 15px; padding: 10px; background: #fff3cd; border-radius: 5px; font-size: 0.9em; border-left: 4px solid #ffc107;">
+                    <strong>⚠️ Внимание:</strong> Номер будет удален временно на сайте. Для постоянного удаления удалите его из Google Таблицы вручную.
+                </div>
+            </div>
+
+            <!-- Вкладка загрузки файла -->
+            <div id="uploadTab" class="tab-content">
+                <div class="upload-area" id="uploadArea" onclick="document.getElementById('fileInput').click()">
+                    <div class="upload-icon">📄</div>
+                    <h4>Перетащите файл сюда или нажмите для выбора</h4>
+                    <p style="margin-top: 10px; color: #666;">Поддерживаются: Excel (.xlsx, .xls), CSV (.csv), текстовые файлы (.txt)</p>
+                </div>
+                <input type="file" id="fileInput" class="file-input" accept=".xlsx,.xls,.csv,.txt" onchange="handleFileSelect(event)">
+                
+                <div id="fileInfo" class="file-info" style="display: none;"></div>
+
+                <div style="margin-top: 15px; padding: 10px; background: #f0f0f0; border-radius: 5px; font-size: 0.9em;">
+                    <strong>Формат файла:</strong>
+                    <ul style="margin-top: 5px; margin-left: 20px;">
+                        <li>Excel: номера в первом столбце</li>
+                        <li>CSV: номера через запятую или в отдельных строках</li>
+                        <li>TXT: каждый номер с новой строки</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div style="margin-top: 20px; border-top: 2px solid #f0f0f0; padding-top: 20px;">
+                <button class="btn btn-clear" onclick="clearDatabase()">🗑️ Очистить всю базу</button>
+                <button class="btn btn-upload" onclick="exportDatabase()">💾 Экспортировать базу</button>
+            </div>
+        </div>
+
+        <div class="search-box">
+            <div class="search-input-group">
+                <input 
+                    type="text" 
+                    id="searchInput" 
+                    placeholder="Введите цифры (например: 2244)"
+                    maxlength="15"
+                >
+                <button class="btn btn-search" onclick="searchNumbers()">Найти</button>
+                <button class="btn btn-clear" onclick="clearSearch()">Очистить</button>
+            </div>
+            <div class="stats">
+                <span>Всего в базе: <strong id="totalCount">0</strong> номеров</span>
+                <span>Найдено: <strong id="foundCount">0</strong></span>
+                <span id="syncStatus" style="color: #666; font-size: 0.85em;">⏳ Подключение...</span>
+            </div>
+        </div>
+
+        <div class="results">
+            <div class="results-header">
+                <div class="results-count" id="resultsHeader">Введите цифры для поиска</div>
+            </div>
+            <div class="phone-list" id="phoneList">
+                <div class="no-results">
+                    <div class="no-results-icon">📱</div>
+                    <p>Начните вводить цифры для поиска номеров</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // ============================================
+        // НАСТРОЙКА GOOGLE SHEETS
+        // ============================================
+        // Замените это значение на ID вашей Google Таблицы
+        const SHEET_ID = '1RJDzNYpsn0ELMx6gvHNqWloGabobwU4AN6DPge3Np6Y';
+        const SHEET_NAME = 'Лист1'; // Название листа в таблице (обычно "Лист1")
+        
+        // База данных номеров
+        let phoneDatabase = [];
+        let isLoadingFromSheets = false;
+        let lastUpdateTime = 0;
+
+        // Загрузка базы данных из Google Sheets
+        async function loadDatabase() {
+            try {
+                isLoadingFromSheets = true;
+                
+                // URL для получения данных из Google Sheets в формате CSV (прямой экспорт)
+                // Используем export вместо gviz для лучшей совместимости
+                const url = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/export?format=csv&gid=0`;
+                
+                console.log('Загрузка из:', url);
+                
+                const response = await fetch(url);
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                
+                const csvText = await response.text();
+                
+                console.log('Получены данные:', csvText.substring(0, 200));
+                
+                // Парсим CSV
+                const lines = csvText.split('\n');
+                phoneDatabase = [];
+                
+                // Пропускаем первую строку (заголовок) и обрабатываем остальные
+                for (let i = 1; i < lines.length; i++) {
+                    const line = lines[i].trim();
+                    if (line) {
+                        // Убираем кавычки если есть и берем первую колонку
+                        let number = line.split(',')[0].replace(/^"|"$/g, '').trim();
+                        if (number && number !== 'phone') {
+                            phoneDatabase.push(number);
+                        }
+                    }
+                }
+                
+                updateTotalCount();
+                lastUpdateTime = Date.now();
+                isLoadingFromSheets = false;
+                
+                // Обновляем статус
+                const syncStatus = document.getElementById('syncStatus');
+                if (syncStatus) {
+                    syncStatus.style.color = '#28a745';
+                    syncStatus.innerHTML = '✅ Синхронизировано';
+                    const now = new Date();
+                    syncStatus.title = `Последнее обновление: ${now.toLocaleTimeString()}`;
+                }
+                
+                console.log(`✅ Успешно загружено ${phoneDatabase.length} номеров из Google Sheets`);
+                
+            } catch (error) {
+                console.error('❌ Ошибка загрузки из Google Sheets:', error);
+                isLoadingFromSheets = false;
+                
+                const syncStatus = document.getElementById('syncStatus');
+                
+                // Если не удалось загрузить, пытаемся использовать localStorage как запасной вариант
+                const saved = localStorage.getItem('phoneDatabase');
+                if (saved) {
+                    phoneDatabase = JSON.parse(saved);
+                    updateTotalCount();
+                    
+                    if (syncStatus) {
+                        syncStatus.style.color = '#856404';
+                        syncStatus.innerHTML = '⚠️ Локальный режим';
+                        syncStatus.title = 'Не удалось подключиться к Google Sheets. Используются локальные данные.';
+                    }
+                    
+                    console.warn('⚠️ Используются локальные данные');
+                } else {
+                    if (syncStatus) {
+                        syncStatus.style.color = '#dc3545';
+                        syncStatus.innerHTML = '❌ Ошибка подключения';
+                        syncStatus.title = 'Не удалось загрузить данные. Проверьте настройки доступа к таблице.';
+                    }
+                    
+                    console.error('❌ Нет локальных данных');
+                    alert('❌ Не удалось загрузить данные!\n\nПроверьте:\n1. Таблица доступна "Всем, у кого есть ссылка"\n2. Права: Читатель или Редактор\n\nОткройте консоль (F12) для подробностей.');
+                }
+            }
+        }
+
+        // Сохранение в Google Sheets (через добавление строки)
+        // Примечание: для полноценной работы нужен Google Apps Script
+        async function saveToSheets(number, action = 'add') {
+            // Сохраняем локально как резервную копию
+            localStorage.setItem('phoneDatabase', JSON.stringify(phoneDatabase));
+            updateTotalCount();
+            
+            // Для полноценного добавления/удаления нужен Google Apps Script
+            // Пока работаем только с чтением из таблицы
+            console.log(`Действие ${action}: ${number}`);
+            console.log('Для синхронизации с Google Sheets добавьте номер вручную в таблицу');
+        }
+
+        // Сохранение базы данных (обратная совместимость)
+        function saveDatabase() {
+            localStorage.setItem('phoneDatabase', JSON.stringify(phoneDatabase));
+            updateTotalCount();
+        }
+
+        // Обновление счетчика
+        function updateTotalCount() {
+            document.getElementById('totalCount').textContent = phoneDatabase.length;
+        }
+
+        // Функция для выделения найденных цифр
+        function highlightDigits(phoneNumber, searchDigits) {
+            if (!searchDigits) return phoneNumber;
+            
+            // Находим позицию последовательности в номере (только цифры)
+            const phoneDigits = phoneNumber.replace(/\D/g, '');
+            const startIndex = phoneDigits.indexOf(searchDigits);
+            
+            if (startIndex === -1) return phoneNumber;
+            
+            // Нужно найти эту позицию в оригинальной строке с форматированием
+            let digitCount = 0;
+            let result = '';
+            let highlightStarted = false;
+            let highlightedDigits = 0;
+            
+            for (let i = 0; i < phoneNumber.length; i++) {
+                const char = phoneNumber[i];
+                
+                if (/\d/.test(char)) {
+                    // Это цифра
+                    if (digitCount === startIndex && !highlightStarted) {
+                        // Начинаем выделение
+                        result += '<span class="highlight">';
+                        highlightStarted = true;
+                    }
+                    
+                    result += char;
+                    
+                    if (highlightStarted) {
+                        highlightedDigits++;
+                        if (highlightedDigits === searchDigits.length) {
+                            // Заканчиваем выделение
+                            result += '</span>';
+                            highlightStarted = false;
+                        }
+                    }
+                    
+                    digitCount++;
+                } else {
+                    // Не цифра (пробел, дефис и т.д.)
+                    result += char;
+                }
+            }
+            
+            return result;
+        }
+
+        // Функция поиска
+        function searchNumbers() {
+            const searchValue = document.getElementById('searchInput').value.trim();
+            const phoneList = document.getElementById('phoneList');
+            const resultsHeader = document.getElementById('resultsHeader');
+            const foundCount = document.getElementById('foundCount');
+
+            if (!searchValue) {
+                phoneList.innerHTML = `
+                    <div class="no-results">
+                        <div class="no-results-icon">📱</div>
+                        <p>Введите цифры для поиска</p>
+                    </div>
+                `;
+                resultsHeader.textContent = 'Введите цифры для поиска';
+                foundCount.textContent = '0';
+                return;
+            }
+
+            // Фильтруем номера - ищем цифры подряд в том же порядке
+            const searchDigits = searchValue.replace(/\D/g, '');
+            const results = phoneDatabase.filter(phone => {
+                const phoneDigits = phone.replace(/\D/g, '');
+                // Проверяем, содержится ли последовательность цифр подряд
+                return phoneDigits.includes(searchDigits);
+            });
+
+            foundCount.textContent = results.length;
+
+            if (results.length === 0) {
+                phoneList.innerHTML = `
+                    <div class="no-results">
+                        <div class="no-results-icon">😕</div>
+                        <p>Номера с цифрами "${searchValue}" не найдены</p>
+                        <p style="margin-top: 10px; font-size: 0.9em;">Попробуйте другую комбинацию</p>
+                    </div>
+                `;
+                resultsHeader.textContent = 'Ничего не найдено';
+            } else {
+                resultsHeader.textContent = `Найдено номеров: ${results.length}`;
+                phoneList.innerHTML = results.map((phone, index) => `
+                    <div class="phone-item" onclick="selectPhoneNumber('${phone.replace(/'/g, "\\'")}')">
+                        <div>
+                            <div class="phone-number">${highlightDigits(phone, searchDigits)}</div>
+                        </div>
+                        <div class="phone-info">#${index + 1}</div>
+                    </div>
+                `).join('');
+            }
+        }
+
+        // Функция выбора номера
+        function selectPhoneNumber(phone) {
+            // Проверяем, открыта ли админ-панель
+            const adminPanel = document.getElementById('adminPanel');
+            if (adminPanel && adminPanel.style.display === 'block') {
+                // Если админ-панель открыта - не показываем окна покупки
+                return;
+            }
+            
+            // Первое подтверждение
+            const confirmed = confirm(`Вы действительно хотите выбрать этот номер?\n\n${phone}`);
+            
+            if (!confirmed) {
+                return; // Пользователь нажал "Нет" или "Отмена"
+            }
+            
+            // Второе окно с предложением покупки
+            const buyConfirmed = confirm(`Купить номер можно написав мне!\n\n📱 Номер: ${phone}\n\nНажмите "ОК" для перехода в Telegram или "Отмена" для возврата.`);
+            
+            if (buyConfirmed) {
+                // Открываем Telegram в новой вкладке
+                window.open('https://t.me/vadim_khilko', '_blank');
+            }
+        }
+
+        // Очистка поиска
+        function clearSearch() {
+            document.getElementById('searchInput').value = '';
+            document.getElementById('foundCount').textContent = '0';
+            document.getElementById('resultsHeader').textContent = 'Введите цифры для поиска';
+            document.getElementById('phoneList').innerHTML = `
+                <div class="no-results">
+                    <div class="no-results-icon">📱</div>
+                    <p>Начните вводить цифры для поиска номеров</p>
+                </div>
+            `;
+        }
+
+        // Поиск по нажатию Enter
+        document.getElementById('searchInput').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                searchNumbers();
+            }
+        });
+
+        // Поиск в реальном времени
+        document.getElementById('searchInput').addEventListener('input', function() {
+            if (this.value.length > 0) {
+                searchNumbers();
+            } else {
+                clearSearch();
+            }
+        });
+
+        // Управление админ-панелью
+        let isAdminAuthenticated = false;
+        const ADMIN_PASSWORD = 'Vadim031002';
+        
+        function toggleAdmin() {
+            const panel = document.getElementById('adminPanel');
+            
+            // Если панель открыта - закрываем
+            if (panel.style.display === 'block') {
+                panel.style.display = 'none';
+                isAdminAuthenticated = false;
+                return;
+            }
+            
+            // Если уже авторизован - просто открываем
+            if (isAdminAuthenticated) {
+                panel.style.display = 'block';
+                return;
+            }
+            
+            // Запрашиваем пароль
+            const enteredPassword = prompt('🔐 Доступ ограничен!\n\nУправление базой доступно только администратору.\nПожалуйста, введите код доступа:');
+            
+            // Если пользователь отменил ввод
+            if (enteredPassword === null) {
+                return;
+            }
+            
+            // Проверяем пароль
+            if (enteredPassword === ADMIN_PASSWORD) {
+                isAdminAuthenticated = true;
+                panel.style.display = 'block';
+                alert('✅ Доступ разрешен!\n\nДобро пожаловать в панель управления.');
+            } else {
+                alert('❌ Неверный код доступа!\n\nДоступ запрещен.');
+            }
+        }
+
+        // Добавление номера
+        function addNumber() {
+            const input = document.getElementById('addNumberInput');
+            const number = input.value.trim();
+            
+            if (!number) {
+                alert('Введите номер телефона');
+                return;
+            }
+
+            if (phoneDatabase.includes(number)) {
+                alert('Этот номер уже есть в базе');
+                return;
+            }
+
+            phoneDatabase.push(number);
+            saveToSheets(number, 'add');
+            input.value = '';
+            
+            alert('✅ Номер добавлен локально!\n\n⚠️ Для постоянного сохранения:\nДобавьте этот номер в вашу Google Таблицу вручную.\n\nНомер: ' + number);
+            
+            // Если идет поиск, обновляем результаты
+            if (document.getElementById('searchInput').value) {
+                searchNumbers();
+            }
+        }
+
+        // Удаление номера
+        function deleteNumber() {
+            const input = document.getElementById('deleteNumberInput');
+            const number = input.value.trim();
+            
+            if (!number) {
+                alert('Введите номер телефона для удаления');
+                return;
+            }
+
+            // Ищем номер в базе
+            const index = phoneDatabase.indexOf(number);
+            
+            if (index === -1) {
+                alert('❌ Номер не найден в базе!\n\nПроверьте правильность ввода.\nНомер должен точно совпадать с тем, как он хранится в базе.');
+                return;
+            }
+
+            // Подтверждение удаления
+            const confirmDelete = confirm(`Вы уверены, что хотите удалить этот номер?\n\n${number}`);
+            
+            if (confirmDelete) {
+                phoneDatabase.splice(index, 1);
+                saveToSheets(number, 'delete');
+                input.value = '';
+                
+                alert('✅ Номер удален локально!\n\n⚠️ Для постоянного удаления:\nУдалите этот номер из вашей Google Таблицы вручную.\n\nНомер: ' + number);
+                
+                // Если идет поиск, обновляем результаты
+                if (document.getElementById('searchInput').value) {
+                    searchNumbers();
+                }
+            }
+        }
+
+        // Очистка базы данных
+        function clearDatabase() {
+            const currentCount = phoneDatabase.length;
+            
+            if (currentCount === 0) {
+                alert('База данных уже пуста!');
+                return;
+            }
+            
+            // Используем confirm для подтверждения
+            const userConfirmed = confirm('Вы уверены, что хотите очистить всю базу?\n\nБудет удалено номеров: ' + currentCount);
+            
+            if (userConfirmed) {
+                // Пользователь нажал ДА - очищаем базу
+                phoneDatabase = [];
+                localStorage.setItem('phoneDatabase', JSON.stringify(phoneDatabase));
+                updateTotalCount();
+                
+                // Очищаем поиск
+                document.getElementById('searchInput').value = '';
+                document.getElementById('foundCount').textContent = '0';
+                document.getElementById('resultsHeader').textContent = 'Введите цифры для поиска';
+                document.getElementById('phoneList').innerHTML = `
+                    <div class="no-results">
+                        <div class="no-results-icon">📱</div>
+                        <p>Начните вводить цифры для поиска номеров</p>
+                    </div>
+                `;
+                
+                // Скрыть информацию о файле
+                const fileInfo = document.getElementById('fileInfo');
+                if (fileInfo) {
+                    fileInfo.style.display = 'none';
+                }
+                
+                alert('База данных очищена!\nУдалено номеров: ' + currentCount);
+            }
+            // Если нажал НЕТ - ничего не делаем
+        }
+
+        // Инициализация при загрузке страницы
+        loadDatabase();
+        
+        // Автоматическое обновление данных из Google Sheets каждые 30 секунд
+        setInterval(() => {
+            if (!isLoadingFromSheets) {
+                loadDatabase();
+            }
+        }, 30000); // 30 секунд
+
+        // Переключение вкладок
+        function switchTab(tabName) {
+            // Скрываем все вкладки
+            document.querySelectorAll('.tab-content').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            document.querySelectorAll('.tab-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+
+            // Показываем выбранную вкладку
+            if (tabName === 'manual') {
+                document.getElementById('manualTab').classList.add('active');
+                event.target.classList.add('active');
+            } else if (tabName === 'delete') {
+                document.getElementById('deleteTab').classList.add('active');
+                event.target.classList.add('active');
+            } else if (tabName === 'upload') {
+                document.getElementById('uploadTab').classList.add('active');
+                event.target.classList.add('active');
+            }
+        }
+
+        // Drag and drop функциональность
+        const uploadArea = document.getElementById('uploadArea');
+
+        uploadArea.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            uploadArea.classList.add('drag-over');
+        });
+
+        uploadArea.addEventListener('dragleave', () => {
+            uploadArea.classList.remove('drag-over');
+        });
+
+        uploadArea.addEventListener('drop', (e) => {
+            e.preventDefault();
+            uploadArea.classList.remove('drag-over');
+            const files = e.dataTransfer.files;
+            if (files.length > 0) {
+                processFile(files[0]);
+            }
+        });
+
+        // Обработка выбора файла
+        function handleFileSelect(event) {
+            const file = event.target.files[0];
+            if (file) {
+                processFile(file);
+            }
+        }
+
+        // Обработка файла
+        function processFile(file) {
+            const fileName = file.name;
+            const fileExtension = fileName.split('.').pop().toLowerCase();
+            const fileInfo = document.getElementById('fileInfo');
+
+            fileInfo.style.display = 'block';
+            fileInfo.innerHTML = `⏳ Загрузка файла: ${fileName}...`;
+
+            const reader = new FileReader();
+
+            reader.onload = function(e) {
+                const content = e.target.result;
+                let numbers = [];
+
+                try {
+                    if (fileExtension === 'txt') {
+                        // Обработка текстового файла
+                        numbers = content.split('\n')
+                            .map(line => line.trim())
+                            .filter(line => line.length > 0);
+                    } else if (fileExtension === 'csv') {
+                        // Обработка CSV файла
+                        const lines = content.split('\n');
+                        lines.forEach(line => {
+                            // Разделяем по запятым, точкам с запятой или табуляции
+                            const parts = line.split(/[,;\t]/).map(p => p.trim());
+                            numbers.push(...parts.filter(p => p.length > 0));
+                        });
+                    } else if (fileExtension === 'xlsx' || fileExtension === 'xls') {
+                        // Обработка Excel файлов с помощью SheetJS
+                        const data = new Uint8Array(content);
+                        const workbook = XLSX.read(data, { type: 'array' });
+                        
+                        // Берем первый лист
+                        const firstSheet = workbook.Sheets[workbook.SheetNames[0]];
+                        
+                        // Конвертируем в JSON
+                        const jsonData = XLSX.utils.sheet_to_json(firstSheet, { header: 1 });
+                        
+                        // Извлекаем номера из первого столбца
+                        jsonData.forEach(row => {
+                            if (row[0]) {
+                                const cellValue = String(row[0]).trim();
+                                if (cellValue.length > 0) {
+                                    numbers.push(cellValue);
+                                }
+                            }
+                        });
+                    }
+
+                    // Фильтруем дубликаты и пустые строки
+                    numbers = numbers.filter(num => num.length > 0);
+                    
+                    if (numbers.length === 0) {
+                        fileInfo.innerHTML = `❌ В файле не найдено номеров. Проверьте формат файла.`;
+                        return;
+                    }
+
+                    // Добавляем номера в базу
+                    let added = 0;
+                    let duplicates = 0;
+
+                    numbers.forEach(num => {
+                        if (!phoneDatabase.includes(num)) {
+                            phoneDatabase.push(num);
+                            added++;
+                        } else {
+                            duplicates++;
+                        }
+                    });
+
+                    saveDatabase();
+                    
+                    fileInfo.innerHTML = `
+                        ✅ Файл успешно загружен!<br>
+                        📊 Добавлено новых номеров: ${added}<br>
+                        ${duplicates > 0 ? `⚠️ Пропущено дубликатов: ${duplicates}<br>` : ''}
+                        📱 Всего в базе: ${phoneDatabase.length} номеров
+                    `;
+
+                    // Обновляем результаты поиска если идет поиск
+                    if (document.getElementById('searchInput').value) {
+                        searchNumbers();
+                    }
+
+                    // Очищаем input для возможности повторной загрузки того же файла
+                    document.getElementById('fileInput').value = '';
+
+                } catch (error) {
+                    fileInfo.innerHTML = `❌ Ошибка при обработке файла: ${error.message}`;
+                    console.error('Ошибка обработки файла:', error);
+                }
+            };
+
+            reader.onerror = function() {
+                fileInfo.innerHTML = `❌ Ошибка при чтении файла`;
+            };
+
+            if (fileExtension === 'txt' || fileExtension === 'csv') {
+                reader.readAsText(file);
+            } else if (fileExtension === 'xlsx' || fileExtension === 'xls') {
+                reader.readAsArrayBuffer(file);
+            }
+        }
+
+        // Показать инструкции для Excel
+        function showExcelInstructions() {
+            if (confirm('Для загрузки Excel файлов:\n\n1. Откройте файл в Excel\n2. Сохраните как CSV (File → Save As → CSV)\n3. Загрузите CSV файл\n\nИли скопируйте номера в текстовый файл (.txt)\n\nОткрыть инструкцию?')) {
+                alert('Инструкция:\n\n1. Откройте ваш Excel файл\n2. Выберите столбец с номерами\n3. Скопируйте (Ctrl+C)\n4. Откройте Блокнот\n5. Вставьте (Ctrl+V)\n6. Сохраните как .txt файл\n7. Загрузите .txt файл на сайт');
+            }
+        }
+
+        // Экспорт базы данных
+        function exportDatabase() {
+            if (phoneDatabase.length === 0) {
+                alert('База данных пуста. Нечего экспортировать.');
+                return;
+            }
+
+            const content = phoneDatabase.join('\n');
+            const blob = new Blob([content], { type: 'text/plain;charset=utf-8' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `phone_database_${new Date().toISOString().split('T')[0]}.txt`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+
+            alert(`Экспортировано ${phoneDatabase.length} номеров`);
+        }
+    </script>
+</body>
+</html>
